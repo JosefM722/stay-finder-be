@@ -7,7 +7,8 @@ const propertySchema = z.object({
   city: z.string().min(1, "City is required"),
   country: z.string().min(1, "Country is required"),
   price_per_night: z.number().int().positive("Price must be greater than 0"),
-  max_guests: z.number().int().positive("Max guests must be greater than 0")
+  max_guests: z.number().int().positive("Max guests must be greater than 0"),
+  image_url: z.string().url("Image URL must be a valid URL").optional().nullable()
 });
 
 const propertyValidator = zValidator("json", propertySchema, (result, c) => {

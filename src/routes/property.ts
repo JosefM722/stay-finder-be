@@ -1,30 +1,25 @@
 import { Hono } from "hono";
-import { promises as fs } from "fs";
-import type { Property } from "../types/property.js";
+import * as db from "../database/property.js";
 import propertyValidator from "../validators/propertyValidator.js";
 import propertyParamValidator from "../validators/propertyParamValidator.js";
+import type { NewProperty } from "../types/property.js";
 
 const propertyApp = new Hono();
 
-// GET /properties
 propertyApp.get("/", async (c) => {
   try {
-    const data = await fs.readFile("src/data/properties.json", "utf8");
-    const properties: Property[] = JSON.parse(data);
+    const properties = await db.getProperties();
     return c.json(properties);
   } catch (error) {
-    return c.json([]);
+    console.error("GET /properties error:", error);
+    return c.json({ error: "Failed to fetch properties" }, 500);
   }
 });
 
-// GET /properties/:id
-propertyApp.get("/:id", async (c) => {
-  const id = c.req.param("id");
-
+propertyApp.get("/:id", propertyParamValidator, async (c) => {
   try {
-    const data = await fs.readFile("src/data/properties.json", "utf8");
-    const properties: Property[] = JSON.parse(data);
-    const property = properties.find((p) => p.id === id);
+    const { id } = c.req.valid("param");
+    const property = await db.getPropertyById(id);
 
     if (!property) {
       return c.json({ error: "Property not found" }, 404);
@@ -32,34 +27,22 @@ propertyApp.get("/:id", async (c) => {
 
     return c.json(property);
   } catch (error) {
-    return c.json({ error: "Kunde inte läsa properties" }, 500);
+    console.error("GET /properties/:id error:", error);
+    return c.json({ error: "Failed to fetch property" }, 500);
   }
 });
 
-// POST /properties
 propertyApp.post("/", propertyValidator, async (c) => {
   try {
-    const body = c.req.valid("json");
-
-    const newProperty: Property = {
-      id: `property_${Math.floor(1000 + Math.random() * 9000)}`,
-      ...body
-    };
-
-    const data = await fs.readFile("src/data/properties.json", "utf8");
-    const properties: Property[] = JSON.parse(data);
-    properties.push(newProperty);
-
-    await fs.writeFile("src/data/properties.json", JSON.stringify(properties, null, 2));
-
-    return c.json(newProperty, 201);
+    const newProperty: NewProperty = c.req.valid("json");
+    const property = await db.createProperty(newProperty);
+    return c.json(property, 201);
   } catch (error) {
-    console.error(error);
+    console.error("POST /properties error:", error);
     return c.json({ error: "Failed to create property" }, 400);
   }
 });
 
-// PUT /properties/:id
 propertyApp.put(
   "/:id",
   propertyParamValidator,
@@ -67,53 +50,34 @@ propertyApp.put(
   async (c) => {
     try {
       const { id } = c.req.valid("param");
-      const body = c.req.valid("json");
+      const body: NewProperty = c.req.valid("json");
 
-      const data = await fs.readFile("src/data/properties.json", "utf8");
-      const properties: Property[] = JSON.parse(data);
+      const updatedProperty = await db.updateProperty(id, body);
 
-      const index = properties.findIndex((p) => p.id === id);
-
-      if (index === -1) {
+      if (!updatedProperty) {
         return c.json({ error: "Property not found" }, 404);
       }
 
-      const updatedProperty: Property = {
-        id,
-        ...body
-      };
-
-      properties[index] = updatedProperty;
-      await fs.writeFile("src/data/properties.json", JSON.stringify(properties, null, 2));
-
       return c.json(updatedProperty);
     } catch (error) {
-      console.error(error);
+      console.error("PUT /properties/:id error:", error);
       return c.json({ error: "Failed to update property" }, 400);
     }
   }
 );
 
-// DELETE /properties/:id
 propertyApp.delete("/:id", propertyParamValidator, async (c) => {
   try {
     const { id } = c.req.valid("param");
+    const deletedProperty = await db.deleteProperty(id);
 
-    const data = await fs.readFile("src/data/properties.json", "utf8");
-    const properties: Property[] = JSON.parse(data);
-
-    const index = properties.findIndex((p) => p.id === id);
-
-    if (index === -1) {
+    if (!deletedProperty) {
       return c.json({ error: "Property not found" }, 404);
     }
 
-    properties.splice(index, 1);
-    await fs.writeFile("src/data/properties.json", JSON.stringify(properties, null, 2));
-
-    return c.json({ message: "Property deleted" });
+    return c.json({ message: "Property deleted", property: deletedProperty });
   } catch (error) {
-    console.error(error);
+    console.error("DELETE /properties/:id error:", error);
     return c.json({ error: "Failed to delete property" }, 500);
   }
 });
