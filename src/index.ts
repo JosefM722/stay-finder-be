@@ -2,6 +2,7 @@ import { serve } from "@hono/node-server";
 import { Hono } from "hono";
 import { env } from "./env.js";
 import propertyApp from "./routes/property.js";
+import bookingApp from "./routes/booking.js";
 
 const app = new Hono({ strict: false });
 
@@ -10,6 +11,7 @@ app.get("/", (c) => {
 });
 
 app.route("/properties", propertyApp);
+app.route("/bookings", bookingApp);
 
 serve(
   {
