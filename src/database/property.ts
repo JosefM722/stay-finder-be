@@ -1,7 +1,9 @@
-import { supabase } from "../lib/supabase.js";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import type { NewProperty, Property } from "../types/property.js";
 
-export async function getProperties(): Promise<Property[]> {
+export async function getProperties(
+  supabase: SupabaseClient
+): Promise<Property[]> {
   const { data, error } = await supabase
     .from("properties")
     .select("*")
@@ -14,7 +16,10 @@ export async function getProperties(): Promise<Property[]> {
   return data ?? [];
 }
 
-export async function getPropertyById(id: string): Promise<Property | null> {
+export async function getPropertyById(
+  supabase: SupabaseClient,
+  id: string
+): Promise<Property | null> {
   const { data, error } = await supabase
     .from("properties")
     .select("*")
@@ -29,6 +34,7 @@ export async function getPropertyById(id: string): Promise<Property | null> {
 }
 
 export async function createProperty(
+  supabase: SupabaseClient,
   property: NewProperty
 ): Promise<Property> {
   const { data, error } = await supabase
@@ -49,6 +55,7 @@ export async function createProperty(
 }
 
 export async function updateProperty(
+  supabase: SupabaseClient,
   id: string,
   property: NewProperty
 ): Promise<Property | null> {
@@ -66,8 +73,11 @@ export async function updateProperty(
   return data;
 }
 
-export async function deleteProperty(id: string): Promise<Property | null> {
-  const existingProperty = await getPropertyById(id);
+export async function deleteProperty(
+  supabase: SupabaseClient,
+  id: string
+): Promise<Property | null> {
+  const existingProperty = await getPropertyById(supabase, id);
 
   if (!existingProperty) {
     return null;

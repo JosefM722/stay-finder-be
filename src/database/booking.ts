@@ -1,7 +1,10 @@
-import { supabase } from "../lib/supabase.js";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Booking, BookingListQuery, NewBooking } from "../types/booking.js";
 
-export async function getBookings(query: BookingListQuery): Promise<Booking[]> {
+export async function getBookings(
+  supabase: SupabaseClient,
+  query: BookingListQuery
+): Promise<Booking[]> {
   let supabaseQuery = supabase
     .from("bookings")
     .select("*")
@@ -24,7 +27,10 @@ export async function getBookings(query: BookingListQuery): Promise<Booking[]> {
   return data ?? [];
 }
 
-export async function getBookingById(id: string): Promise<Booking | null> {
+export async function getBookingById(
+  supabase: SupabaseClient,
+  id: string
+): Promise<Booking | null> {
   const { data, error } = await supabase
     .from("bookings")
     .select("*")
@@ -38,7 +44,10 @@ export async function getBookingById(id: string): Promise<Booking | null> {
   return data;
 }
 
-export async function createBooking(booking: NewBooking): Promise<Booking> {
+export async function createBooking(
+  supabase: SupabaseClient,
+  booking: NewBooking
+): Promise<Booking> {
   const payload = {
     ...booking,
     status: booking.status ?? "pending"
