@@ -2,18 +2,16 @@ import { Hono } from "hono";
 import * as db from "../database/booking.js";
 import bookingValidator from "../validators/bookingValidator.js";
 import bookingParamValidator from "../validators/bookingParamValidator.js";
-import bookingQueryValidator from "../validators/bookingQueryValidator.js";
 import type { NewBooking } from "../types/booking.js";
 import { requireAuth } from "../middleware/auth.js";
 
 const bookingApp = new Hono();
 
 // GET /bookings
-bookingApp.get("/", requireAuth, bookingQueryValidator, async (c) => {
+bookingApp.get("/", requireAuth, async (c) => {
   try {
     const supabase = c.get("supabase");
-    const query = c.req.valid("query");
-    const bookings = await db.getBookings(supabase, query);
+    const bookings = await db.getBookings(supabase);
     return c.json(bookings);
   } catch (error) {
     return c.json({ error: "Failed to fetch bookings" }, 500);

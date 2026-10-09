@@ -1,8 +1,8 @@
-import type { SupabaseClient } from "@supabase/supabase-js";
+import type { BasicSupabaseClient } from "../types/supabase.js";
 import type { NewProperty, Property } from "../types/property.js";
 
 export async function getProperties(
-  supabase: SupabaseClient
+  supabase: BasicSupabaseClient
 ): Promise<Property[]> {
   const { data, error } = await supabase
     .from("properties")
@@ -17,7 +17,7 @@ export async function getProperties(
 }
 
 export async function getPropertyById(
-  supabase: SupabaseClient,
+  supabase: BasicSupabaseClient,
   id: string
 ): Promise<Property | null> {
   const { data, error } = await supabase
@@ -34,7 +34,7 @@ export async function getPropertyById(
 }
 
 export async function createProperty(
-  supabase: SupabaseClient,
+  supabase: BasicSupabaseClient,
   property: NewProperty
 ): Promise<Property> {
   const { data, error } = await supabase
@@ -55,7 +55,7 @@ export async function createProperty(
 }
 
 export async function updateProperty(
-  supabase: SupabaseClient,
+  supabase: BasicSupabaseClient,
   id: string,
   property: NewProperty
 ): Promise<Property | null> {
@@ -74,7 +74,7 @@ export async function updateProperty(
 }
 
 export async function deleteProperty(
-  supabase: SupabaseClient,
+  supabase: BasicSupabaseClient,
   id: string
 ): Promise<Property | null> {
   const existingProperty = await getPropertyById(supabase, id);

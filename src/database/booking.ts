@@ -1,24 +1,13 @@
-import type { SupabaseClient } from "@supabase/supabase-js";
-import type { Booking, BookingListQuery, NewBooking } from "../types/booking.js";
+import type { BasicSupabaseClient } from "../types/supabase.js";
+import type { Booking, NewBooking } from "../types/booking.js";
 
 export async function getBookings(
-  supabase: SupabaseClient,
-  query: BookingListQuery
+  supabase: BasicSupabaseClient
 ): Promise<Booking[]> {
-  let supabaseQuery = supabase
+  const { data, error } = await supabase
     .from("bookings")
     .select("*")
     .order("created_at", { ascending: false });
-
-  if (query.from) {
-    supabaseQuery = supabaseQuery.gte("check_in", query.from);
-  }
-
-  if (query.to) {
-    supabaseQuery = supabaseQuery.lte("check_in", query.to);
-  }
-
-  const { data, error } = await supabaseQuery;
 
   if (error) {
     throw new Error(error.message);
@@ -28,7 +17,7 @@ export async function getBookings(
 }
 
 export async function getBookingById(
-  supabase: SupabaseClient,
+  supabase: BasicSupabaseClient,
   id: string
 ): Promise<Booking | null> {
   const { data, error } = await supabase
@@ -45,7 +34,7 @@ export async function getBookingById(
 }
 
 export async function createBooking(
-  supabase: SupabaseClient,
+  supabase: BasicSupabaseClient,
   booking: NewBooking
 ): Promise<Booking> {
   const payload = {

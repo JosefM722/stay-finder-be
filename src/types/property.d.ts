@@ -1,14 +1,9 @@
-export interface NewProperty {
-  title: string;
-  description: string;
-  city: string;
-  country: string;
-  price_per_night: number;
-  max_guests: number;
-  image_url?: string | null;
-}
+import type { Database } from "./database.types.js";
 
-export interface Property extends NewProperty {
-  id: string;
-  created_at: string;
-}
+export type Property = Database["public"]["Tables"]["properties"]["Row"];
+
+type PropertyInsert = Database["public"]["Tables"]["properties"]["Insert"];
+
+export type NewProperty = Omit<PropertyInsert, "property_id" | "created_at">;
+
+export type PropertyValidKey = keyof Property;  

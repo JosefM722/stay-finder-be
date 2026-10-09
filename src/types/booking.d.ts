@@ -1,22 +1,9 @@
-export type BookingStatus = "pending" | "confirmed" | "cancelled";
+import type { Database } from "./database.types.js";
 
-export interface NewBooking {
-  property_id: string;
-  guest_name: string;
-  guest_email: string;
-  check_in: string;
-  check_out: string;
-  guests: number;
-  status?: BookingStatus;
-}
+export type Booking = Database["public"]["Tables"]["bookings"]["Row"];
 
-export interface Booking extends NewBooking {
-  id: string;
-  status: BookingStatus;
-  created_at: string;
-}
+type BookingInsert = Database["public"]["Tables"]["bookings"]["Insert"];
 
-export type BookingListQuery = {
-  from?: string;
-  to?: string;
-};
+export type NewBooking = Omit<BookingInsert, "id" | "created_at">;
+
+export type BookingValidKey = keyof Booking;
